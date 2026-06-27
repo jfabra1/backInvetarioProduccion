@@ -6,8 +6,12 @@ class UsuarioRepository extends BaseRepository {
     super(Usuario);
   }
 
+  async findById(id) {
+    return await this.model.findById(id).populate("sedeId", "nombre");
+  }
+
   async findByEmail(email) {
-    return await this.model.findOne({ email, activo: true });
+    return await this.model.findOne({ email, activo: true }).populate("sedeId", "nombre");
   }
 
   async findByIdConRol(id) {

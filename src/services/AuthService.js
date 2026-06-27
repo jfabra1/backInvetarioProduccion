@@ -20,13 +20,21 @@ class AuthService {
       }
     }
 
+    // Normaliza sedeId: siempre devuelve { _id, nombre } o null
+    const sedeRaw = usuario.sedeId;
+    const sedeId = sedeRaw
+      ? typeof sedeRaw === "object" && sedeRaw._id
+        ? { _id: String(sedeRaw._id), nombre: sedeRaw.nombre || "" }
+        : { _id: String(sedeRaw), nombre: "" }
+      : null;
+
     return {
       id: usuario._id,
       nombre: usuario.nombre,
       email: usuario.email,
       esAdmin: usuario.esAdmin,
       rolId: usuario.rolId,
-      sedeId: usuario.sedeId,
+      sedeId,
       debeCambiarContrasena: usuario.debeCambiarContrasena,
       permisos,
     };

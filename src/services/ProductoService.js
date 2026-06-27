@@ -1,4 +1,5 @@
 import ProductoRepository from "../repositories/ProductoRepository.js";
+import StockRepository from "../repositories/StockRepository.js";
 import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
@@ -43,17 +44,43 @@ class ProductoService {
   }
 
   async obtenerProductosPaginado(pagina, limite, filtros = {}) {
-    const filtroConsulta = { ...filtros };
+    const escaparRegex = (texto = "") =>
+      String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const filtroConsulta = {};
+
     if (!filtros.incluirInactivos) {
       filtroConsulta.activo = true;
     }
-    delete filtroConsulta.incluirInactivos;
+    if (filtros.nombre) {
+      filtroConsulta.nombre = { $regex: escaparRegex(filtros.nombre), $options: "i" };
+    }
+    if (filtros.codigoInterno) {
+      filtroConsulta.codigoInterno = { $regex: escaparRegex(filtros.codigoInterno), $options: "i" };
+    }
+    if (filtros.codigoExterno) {
+      filtroConsulta.codigoExterno = { $regex: escaparRegex(filtros.codigoExterno), $options: "i" };
+    }
+    if (filtros.categoriaId) {
+      filtroConsulta.categoriaId = filtros.categoriaId;
+    }
+    if (filtros.subcategoriaId) {
+      filtroConsulta.subcategoriaId = filtros.subcategoriaId;
+    }
+    if (filtros.sedeId) {
+      const productoIds = await StockRepository.findProductoIdsBySedeId(filtros.sedeId);
+      filtroConsulta._id = { $in: productoIds };
+    }
 
     return await ProductoRepository.findPaginado(
       filtroConsulta,
       pagina,
       limite,
     );
+  }
+
+  async buscarPorCodigo(codigo) {
+    return ProductoRepository.findByCodigo(codigo);
   }
 
   async obtenerProductoPorId(id) {

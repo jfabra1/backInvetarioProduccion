@@ -43,6 +43,14 @@ async function productoRoutes(fastify) {
   );
 
   fastify.get(
+    "/buscar-codigo",
+    {
+      preHandler: verificarPermiso("productos", "ver"),
+    },
+    (req, reply) => ProductoController.buscarPorCodigo(req, reply),
+  );
+
+  fastify.get(
     "/:id",
     {
       schema: schemaObtenerProducto,

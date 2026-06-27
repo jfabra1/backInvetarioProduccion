@@ -9,13 +9,16 @@ class AuthController {
       contrasena,
     );
 
+    // En el JWT solo va el ID (string) de la sede; el objeto poblado va en el body
+    const sedeIdJwt = usuario.sedeId?._id ?? usuario.sedeId ?? null;
+
     const accessToken = await reply.jwtSign({
       id: usuario.id,
       nombre: usuario.nombre,
       email: usuario.email,
       esAdmin: usuario.esAdmin,
       rolId: usuario.rolId,
-      sedeId: usuario.sedeId,
+      sedeId: sedeIdJwt,
     });
 
     reply.setCookie("refreshToken", refreshToken, {
@@ -28,7 +31,7 @@ class AuthController {
 
     return RespuestaApi.exito(reply, "Login exitoso", {
       accessToken,
-      usuario,
+      usuario,        // contiene sedeId poblado { _id, nombre }
     });
   }
 
@@ -37,13 +40,15 @@ class AuthController {
     const { usuario, refreshToken } =
       await AuthService.renovarToken(refreshTokenAnterior);
 
+    const sedeIdJwt = usuario.sedeId?._id ?? usuario.sedeId ?? null;
+
     const accessToken = await reply.jwtSign({
       id: usuario.id,
       nombre: usuario.nombre,
       email: usuario.email,
       esAdmin: usuario.esAdmin,
       rolId: usuario.rolId,
-      sedeId: usuario.sedeId,
+      sedeId: sedeIdJwt,
     });
 
     reply.setCookie("refreshToken", refreshToken, {
@@ -56,7 +61,7 @@ class AuthController {
 
     return RespuestaApi.exito(reply, "Token renovado", {
       accessToken,
-      usuario,
+      usuario,        // contiene sedeId poblado { _id, nombre }
     });
   }
 

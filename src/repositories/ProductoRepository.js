@@ -14,6 +14,14 @@ class ProductoRepository extends BaseRepository {
     return this.model.findOne({ codigoExterno: codigo, activo: true });
   }
 
+  async findByCodigo(codigo) {
+    const q = (codigo || "").trim();
+    return this.model.findOne({
+      activo: true,
+      $or: [{ codigoExterno: q }, { codigoInterno: q }],
+    });
+  }
+
   async findAllPaginado(pagina, limite, filtros = {}) {
     const consulta = this.construirFiltros(filtros);
     const saltar = (pagina - 1) * limite;

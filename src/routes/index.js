@@ -15,6 +15,7 @@ import ajusteInventarioRoutes from "./ajusteInventario.routes.js";
 import ordenDespachoRoutes from "./ordenDespacho.routes.js";
 import inventarioRoutes from "./inventario.routes.js";
 import importacionRoutes from "./importacion.routes.js";
+import ventaRoutes from "./venta.routes.js";
 
 const rutasPrincipales = async (fastify, opciones) => {
   // ─── Rutas sin autenticación ─────────────────────────────
@@ -41,6 +42,7 @@ const rutasPrincipales = async (fastify, opciones) => {
   });
   await fastify.register(inventarioRoutes, { prefix: "/v1/inventario" });
   await fastify.register(importacionRoutes, { prefix: "/v1/importacion" });
+  await fastify.register(ventaRoutes,      { prefix: "/v1/ventas" });
 
   // Ruta de health check
   fastify.get("/health", async () => ({

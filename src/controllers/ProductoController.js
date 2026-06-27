@@ -36,6 +36,7 @@ class ProductoController {
       codigoInterno,
       codigoExterno,
       incluirInactivos,
+      sedeId,
     } = request.query;
     const filtros = {};
     if (nombre) filtros.nombre = nombre;
@@ -43,6 +44,7 @@ class ProductoController {
     if (subcategoriaId) filtros.subcategoriaId = subcategoriaId;
     if (codigoInterno) filtros.codigoInterno = codigoInterno;
     if (codigoExterno) filtros.codigoExterno = codigoExterno;
+    if (sedeId) filtros.sedeId = sedeId;
     filtros.incluirInactivos = this.resolverBoolean(incluirInactivos, false);
 
     const resultado = await ProductoService.obtenerProductosPaginado(
@@ -54,6 +56,14 @@ class ProductoController {
       productos: resultado.documentos || [],
       paginacion: resultado.paginacion,
     });
+  }
+
+  async buscarPorCodigo(request, reply) {
+    const { codigo } = request.query;
+    if (!codigo) return RespuestaApi.error(reply, "Falta el parámetro codigo", 400);
+    const producto = await ProductoService.buscarPorCodigo(codigo);
+    if (!producto) return RespuestaApi.error(reply, "Producto no encontrado", 404);
+    return RespuestaApi.exito(reply, "Producto encontrado", { producto });
   }
 
   async obtenerPorId(request, reply) {
