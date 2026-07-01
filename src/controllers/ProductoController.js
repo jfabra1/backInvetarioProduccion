@@ -35,6 +35,8 @@ class ProductoController {
       subcategoriaId,
       codigoInterno,
       codigoExterno,
+      busqueda,
+      sedeId,
       incluirInactivos,
     } = request.query;
     const filtros = {};
@@ -43,6 +45,8 @@ class ProductoController {
     if (subcategoriaId) filtros.subcategoriaId = subcategoriaId;
     if (codigoInterno) filtros.codigoInterno = codigoInterno;
     if (codigoExterno) filtros.codigoExterno = codigoExterno;
+    if (busqueda) filtros.busqueda = busqueda;
+    if (sedeId) filtros.sedeId = sedeId;
     filtros.incluirInactivos = this.resolverBoolean(incluirInactivos, false);
 
     const resultado = await ProductoService.obtenerProductosPaginado(
@@ -61,6 +65,22 @@ class ProductoController {
       request.params.id,
     );
     return RespuestaApi.exito(reply, "Producto obtenido", { producto });
+  }
+
+  async buscarPorCodigo(request, reply) {
+    const producto = await ProductoService.buscarPorCodigoExterno(
+      request.query.codigo,
+    );
+    return RespuestaApi.exito(reply, "Producto obtenido", { producto });
+  }
+
+  async asignarUbicacion(request, reply) {
+    const producto = await ProductoService.asignarUbicacion(
+      request.params.id,
+      request.body,
+      request.usuarioId,
+    );
+    return RespuestaApi.exito(reply, "Ubicación asignada", { producto });
   }
 
   async actualizar(request, reply) {

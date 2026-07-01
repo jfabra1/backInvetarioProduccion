@@ -6,6 +6,8 @@ class EntradaController {
     const entrada = await EntradaService.crearEntrada(
       request.body,
       request.usuarioId,
+      null,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Entrada registrada", { entrada }, 201);
   }
@@ -54,6 +56,7 @@ class EntradaController {
     const entrada = await EntradaService.anularEntrada(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Entrada anulada", { entrada });
   }

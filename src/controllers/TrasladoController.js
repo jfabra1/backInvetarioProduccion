@@ -26,11 +26,13 @@ class TrasladoController {
       limite = 20,
       sedeOrigenId,
       sedeDestinoId,
+      sedeId,
       estado,
     } = request.query;
     const filtros = {};
     if (sedeOrigenId) filtros.sedeOrigenId = sedeOrigenId;
     if (sedeDestinoId) filtros.sedeDestinoId = sedeDestinoId;
+    if (sedeId) filtros.sedeId = sedeId;
     if (estado) filtros.estado = estado;
 
     const resultado = await TrasladoService.obtenerTrasladosPaginado(
@@ -56,6 +58,7 @@ class TrasladoController {
       request.params.id,
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Traslado procesado", { traslado });
   }
@@ -64,6 +67,7 @@ class TrasladoController {
     const traslado = await TrasladoService.despacharTraslado(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Traslado despachado", { traslado });
   }
@@ -72,6 +76,7 @@ class TrasladoController {
     const traslado = await TrasladoService.recibirTraslado(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Traslado recibido", { traslado });
   }

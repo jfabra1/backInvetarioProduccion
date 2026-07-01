@@ -6,6 +6,7 @@ class OrdenDespachoController {
     const orden = await OrdenDespachoService.crearOrden(
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(
       reply,
@@ -57,6 +58,7 @@ class OrdenDespachoController {
     const orden = await OrdenDespachoService.prepararOrden(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden en preparación", { orden });
   }
@@ -65,6 +67,7 @@ class OrdenDespachoController {
     const orden = await OrdenDespachoService.despacharOrden(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden despachada", { orden });
   }
@@ -73,6 +76,7 @@ class OrdenDespachoController {
     const orden = await OrdenDespachoService.confirmarEntrega(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Entrega confirmada", { orden });
   }
@@ -81,6 +85,7 @@ class OrdenDespachoController {
     const orden = await OrdenDespachoService.anularOrden(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden anulada", { orden });
   }

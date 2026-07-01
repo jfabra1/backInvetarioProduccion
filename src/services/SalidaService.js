@@ -5,12 +5,14 @@ import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
+import { verificarAccesoSede } from "../utils/accesoSede.util.js";
 
 class SalidaService {
-  async crearSalida(datos, usuarioId, sesionExterna = null) {
+  async crearSalida(datos, usuarioId, sesionExterna = null, usuarioActual = null) {
     if (!datos.items || datos.items.length === 0) {
       throw new ErrorApi(400, "La salida debe tener al menos un item");
     }
+    verificarAccesoSede(usuarioActual, datos.sedeId, "crear salidas en");
 
     const sesion = sesionExterna || (await mongoose.startSession());
     if (!sesionExterna) sesion.startTransaction();
@@ -107,9 +109,10 @@ class SalidaService {
     return salida;
   }
 
-  async anularSalida(id, usuarioId) {
+  async anularSalida(id, usuarioId, usuarioActual = null) {
     const salida = await SalidaRepository.findById(id);
     if (!salida) throw new ErrorApi(404, "Salida no encontrada");
+    verificarAccesoSede(usuarioActual, salida.sedeId, "anular salidas de");
     if (salida.estado === "anulada")
       throw new ErrorApi(400, "La salida ya está anulada");
 

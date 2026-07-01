@@ -86,6 +86,10 @@ const schemaListarTrasladosPaginado = {
       limite: { type: "integer", minimum: 1, maximum: 100, default: 20 },
       sedeOrigenId: { type: "string" },
       sedeDestinoId: { type: "string" },
+      sedeId: {
+        type: "string",
+        description: "Traslados donde esta sede es origen o destino",
+      },
       estado: { type: "string" },
     },
   },

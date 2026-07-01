@@ -6,6 +6,7 @@ class AjusteInventarioController {
     const ajuste = await AjusteInventarioService.crearAjuste(
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(
       reply,

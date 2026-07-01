@@ -6,6 +6,8 @@ class SalidaController {
     const salida = await SalidaService.crearSalida(
       request.body,
       request.usuarioId,
+      null,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Salida registrada", { salida }, 201);
   }
@@ -54,6 +56,7 @@ class SalidaController {
     const salida = await SalidaService.anularSalida(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Salida anulada", { salida });
   }

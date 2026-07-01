@@ -15,11 +15,11 @@ export const verificarPermiso = (modulo, accion) => {
   return async (request, reply) => {
     if (!request.usuarioId) throw new ErrorApi(401, "No autenticado");
 
-    const { rolId, esAdmin } = request.usuario;
+    const { rolId } = request.usuario;
 
-    // Admin general tiene todos los permisos
-    if (esAdmin) return;
-
+    // "esAdmin" solo habilita operar entre sedes (ver soloAdmin más abajo
+    // y las rutas que inyectan sedeUsuario). Los permisos por módulo/acción
+    // siempre se determinan por el rol asignado, sin excepción.
     if (!rolId) {
       throw new ErrorApi(403, "No tienes un rol asignado");
     }

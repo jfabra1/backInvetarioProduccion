@@ -10,6 +10,10 @@ class StockRepository extends BaseRepository {
     return this.model.findOne({ productoId, sedeId }, null, opciones);
   }
 
+  async obtenerProductoIdsPorSede(sedeId) {
+    return this.model.distinct("productoId", { sedeId });
+  }
+
   async incrementarStock(productoId, sedeId, cantidad, opciones = {}) {
     return this.model.findOneAndUpdate(
       { productoId, sedeId },

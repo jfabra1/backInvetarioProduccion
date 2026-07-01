@@ -7,6 +7,7 @@ import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
+import { verificarAccesoSede } from "../utils/accesoSede.util.js";
 
 class TrasladoService {
   async crearSolicitud(datos, usuarioId) {
@@ -52,9 +53,10 @@ class TrasladoService {
     return traslado;
   }
 
-  async aprobarTraslado(id, datos, usuarioId) {
+  async aprobarTraslado(id, datos, usuarioId, usuarioActual) {
     const traslado = await TrasladoRepository.findById(id);
     if (!traslado) throw new ErrorApi(404, "Traslado no encontrado");
+    verificarAccesoSede(usuarioActual, traslado.sedeOrigenId, "aprobar");
     if (traslado.estado !== "pendiente") {
       throw new ErrorApi(400, "Solo se pueden aprobar traslados pendientes");
     }
@@ -95,9 +97,10 @@ class TrasladoService {
     return traslado;
   }
 
-  async despacharTraslado(id, usuarioId) {
+  async despacharTraslado(id, usuarioId, usuarioActual) {
     const traslado = await TrasladoRepository.findById(id);
     if (!traslado) throw new ErrorApi(404, "Traslado no encontrado");
+    verificarAccesoSede(usuarioActual, traslado.sedeOrigenId, "despachar");
     if (!["aprobado", "aprobado_parcial"].includes(traslado.estado)) {
       throw new ErrorApi(400, "Solo se pueden despachar traslados aprobados");
     }
@@ -143,9 +146,10 @@ class TrasladoService {
     }
   }
 
-  async recibirTraslado(id, usuarioId) {
+  async recibirTraslado(id, usuarioId, usuarioActual) {
     const traslado = await TrasladoRepository.findById(id);
     if (!traslado) throw new ErrorApi(404, "Traslado no encontrado");
+    verificarAccesoSede(usuarioActual, traslado.sedeDestinoId, "recibir");
     if (traslado.estado !== "en_transito") {
       throw new ErrorApi(400, "Solo se pueden recibir traslados en tránsito");
     }
@@ -194,7 +198,8 @@ class TrasladoService {
   }
 
   async obtenerTrasladosPaginado(pagina, limite, filtros = {}) {
-    return await TrasladoRepository.findPaginado(filtros, pagina, limite);
+    const consulta = TrasladoRepository.construirFiltros(filtros);
+    return await TrasladoRepository.findPaginado(consulta, pagina, limite);
   }
 
   async obtenerTraslados(filtros = {}) {

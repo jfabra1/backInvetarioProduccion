@@ -41,6 +41,14 @@ class TrasladoRepository extends BaseRepository {
     const consulta = {};
     if (filtros.sedeOrigenId) consulta.sedeOrigenId = filtros.sedeOrigenId;
     if (filtros.sedeDestinoId) consulta.sedeDestinoId = filtros.sedeDestinoId;
+    // "Mi sede" (usuario no admin): traslados donde mi sede es origen O destino,
+    // para que la bodega que recibe también los vea (y pueda aceptarlos).
+    if (filtros.sedeId) {
+      consulta.$or = [
+        { sedeOrigenId: filtros.sedeId },
+        { sedeDestinoId: filtros.sedeId },
+      ];
+    }
     if (filtros.estado) consulta.estado = filtros.estado;
     return consulta;
   }

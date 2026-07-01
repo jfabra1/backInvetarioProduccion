@@ -6,6 +6,8 @@ import {
   schemaListarProductos,
   schemaListarProductosPaginado,
   schemaObtenerProducto,
+  schemaBuscarProductoPorCodigo,
+  schemaAsignarUbicacionProducto,
   schemaActualizarProducto,
   schemaEliminarProducto,
   schemaActualizarEstadoProducto,
@@ -43,6 +45,15 @@ async function productoRoutes(fastify) {
   );
 
   fastify.get(
+    "/buscar-codigo",
+    {
+      schema: schemaBuscarProductoPorCodigo,
+      preHandler: verificarPermiso("productos", "ver"),
+    },
+    (req, reply) => ProductoController.buscarPorCodigo(req, reply),
+  );
+
+  fastify.get(
     "/:id",
     {
       schema: schemaObtenerProducto,
@@ -58,6 +69,15 @@ async function productoRoutes(fastify) {
       preHandler: verificarPermiso("productos", "actualizar"),
     },
     (req, reply) => ProductoController.actualizar(req, reply),
+  );
+
+  fastify.patch(
+    "/:id/ubicacion",
+    {
+      schema: schemaAsignarUbicacionProducto,
+      preHandler: verificarPermiso("productos", "actualizar"),
+    },
+    (req, reply) => ProductoController.asignarUbicacion(req, reply),
   );
 
   fastify.delete(

@@ -5,12 +5,14 @@ import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
+import { verificarAccesoSede } from "../utils/accesoSede.util.js";
 
 class OrdenCompraService {
-  async crearOrden(datos, usuarioId) {
+  async crearOrden(datos, usuarioId, usuarioActual = null) {
     if (!datos.items || datos.items.length === 0) {
       throw new ErrorApi(400, "La orden debe tener al menos un item");
     }
+    verificarAccesoSede(usuarioActual, datos.sedeId, "crear órdenes de compra en");
 
     const codigo = await generarCodigo(
       "OC",
@@ -47,9 +49,10 @@ class OrdenCompraService {
     return orden;
   }
 
-  async enviarOrden(id, usuarioId) {
+  async enviarOrden(id, usuarioId, usuarioActual = null) {
     const orden = await OrdenCompraRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "enviar órdenes de compra de");
     if (orden.estado !== "borrador")
       throw new ErrorApi(400, "Solo se pueden enviar borradores");
 
@@ -67,9 +70,10 @@ class OrdenCompraService {
     return actualizada;
   }
 
-  async registrarRecepcion(id, datos, usuarioId) {
+  async registrarRecepcion(id, datos, usuarioId, usuarioActual = null) {
     const orden = await OrdenCompraRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "recepcionar órdenes de compra de");
     if (!["enviada", "recibida_parcial"].includes(orden.estado)) {
       throw new ErrorApi(400, "Esta orden no está pendiente de recepción");
     }
@@ -157,9 +161,10 @@ class OrdenCompraService {
     return orden;
   }
 
-  async actualizarOrden(id, datos, usuarioId) {
+  async actualizarOrden(id, datos, usuarioId, usuarioActual = null) {
     const orden = await OrdenCompraRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "editar órdenes de compra de");
     if (orden.estado !== "borrador")
       throw new ErrorApi(400, "Solo se pueden editar borradores");
 
@@ -180,9 +185,10 @@ class OrdenCompraService {
     return actualizada;
   }
 
-  async anularOrden(id, usuarioId) {
+  async anularOrden(id, usuarioId, usuarioActual = null) {
     const orden = await OrdenCompraRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "anular órdenes de compra de");
     if (!["borrador", "enviada"].includes(orden.estado)) {
       throw new ErrorApi(400, "No se puede anular una orden ya recibida");
     }
