@@ -5,12 +5,14 @@ import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
+import { verificarAccesoSede } from "../utils/accesoSede.util.js";
 
 class OrdenDespachoService {
-  async crearOrden(datos, usuarioId) {
+  async crearOrden(datos, usuarioId, usuarioActual = null) {
     if (!datos.items || datos.items.length === 0) {
       throw new ErrorApi(400, "La orden debe tener al menos un item");
     }
+    verificarAccesoSede(usuarioActual, datos.sedeId, "crear órdenes de despacho en");
 
     const codigo = await generarCodigo(
       "DSP",
@@ -42,9 +44,10 @@ class OrdenDespachoService {
     return orden;
   }
 
-  async prepararOrden(id, usuarioId) {
+  async prepararOrden(id, usuarioId, usuarioActual = null) {
     const orden = await OrdenDespachoRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "preparar órdenes de despacho de");
     if (orden.estado !== "pendiente")
       throw new ErrorApi(400, "Solo órdenes pendientes");
 
@@ -62,9 +65,10 @@ class OrdenDespachoService {
     return await OrdenDespachoRepository.findById(id);
   }
 
-  async despacharOrden(id, usuarioId) {
+  async despacharOrden(id, usuarioId, usuarioActual = null) {
     const orden = await OrdenDespachoRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "despachar órdenes de");
     if (orden.estado !== "en_preparacion")
       throw new ErrorApi(400, "Solo órdenes en preparación");
 
@@ -116,9 +120,10 @@ class OrdenDespachoService {
     }
   }
 
-  async confirmarEntrega(id, usuarioId) {
+  async confirmarEntrega(id, usuarioId, usuarioActual = null) {
     const orden = await OrdenDespachoRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "confirmar entregas de");
     if (orden.estado !== "despachada")
       throw new ErrorApi(400, "Solo órdenes despachadas");
 
@@ -151,9 +156,10 @@ class OrdenDespachoService {
     return orden;
   }
 
-  async anularOrden(id, usuarioId) {
+  async anularOrden(id, usuarioId, usuarioActual = null) {
     const orden = await OrdenDespachoRepository.findById(id);
     if (!orden) throw new ErrorApi(404, "Orden no encontrada");
+    verificarAccesoSede(usuarioActual, orden.sedeId, "anular órdenes de despacho de");
     if (!["pendiente", "en_preparacion"].includes(orden.estado)) {
       throw new ErrorApi(400, "No se puede anular una orden ya despachada");
     }

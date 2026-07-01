@@ -6,6 +6,7 @@ class OrdenCompraController {
     const orden = await OrdenCompraService.crearOrden(
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden de compra creada", { orden }, 201);
   }
@@ -51,6 +52,7 @@ class OrdenCompraController {
       request.params.id,
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden actualizada", { orden });
   }
@@ -59,6 +61,7 @@ class OrdenCompraController {
     const orden = await OrdenCompraService.enviarOrden(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden enviada", { orden });
   }
@@ -68,6 +71,7 @@ class OrdenCompraController {
       request.params.id,
       request.body,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Recepción registrada", { orden });
   }
@@ -76,6 +80,7 @@ class OrdenCompraController {
     const orden = await OrdenCompraService.anularOrden(
       request.params.id,
       request.usuarioId,
+      request.usuario,
     );
     return RespuestaApi.exito(reply, "Orden anulada", { orden });
   }

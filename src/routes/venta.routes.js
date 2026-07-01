@@ -14,7 +14,7 @@ async function ventaRoutes(fastify) {
   fastify.post(
     "/",
     {
-      schema:     schemaCrearVenta,
+      schema: schemaCrearVenta,
       preHandler: verificarPermiso("ventas", "crear"),
     },
     (req, reply) => VentaController.crear(req, reply),
@@ -23,7 +23,7 @@ async function ventaRoutes(fastify) {
   fastify.get(
     "/paginado",
     {
-      schema:     schemaListarVentasPaginado,
+      schema: schemaListarVentasPaginado,
       preHandler: verificarPermiso("ventas", "ver"),
     },
     (req, reply) => VentaController.listarPaginado(req, reply),
@@ -32,7 +32,7 @@ async function ventaRoutes(fastify) {
   fastify.get(
     "/:id",
     {
-      schema:     schemaObtenerVenta,
+      schema: schemaObtenerVenta,
       preHandler: verificarPermiso("ventas", "ver"),
     },
     (req, reply) => VentaController.obtenerPorId(req, reply),
@@ -41,7 +41,7 @@ async function ventaRoutes(fastify) {
   fastify.patch(
     "/:id/anular",
     {
-      schema:     schemaAnularVenta,
+      schema: schemaAnularVenta,
       preHandler: verificarPermiso("ventas", "actualizar"),
     },
     (req, reply) => VentaController.anular(req, reply),

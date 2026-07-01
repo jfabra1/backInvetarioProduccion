@@ -5,12 +5,14 @@ import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
+import { verificarAccesoSede } from "../utils/accesoSede.util.js";
 
 class EntradaService {
-  async crearEntrada(datos, usuarioId, sesionExterna = null) {
+  async crearEntrada(datos, usuarioId, sesionExterna = null, usuarioActual = null) {
     if (!datos.items || datos.items.length === 0) {
       throw new ErrorApi(400, "La entrada debe tener al menos un item");
     }
+    verificarAccesoSede(usuarioActual, datos.sedeId, "crear entradas en");
 
     const sesion = sesionExterna || (await mongoose.startSession());
     if (!sesionExterna) sesion.startTransaction();
@@ -86,9 +88,10 @@ class EntradaService {
     return entrada;
   }
 
-  async anularEntrada(id, usuarioId) {
+  async anularEntrada(id, usuarioId, usuarioActual = null) {
     const entrada = await EntradaRepository.findById(id);
     if (!entrada) throw new ErrorApi(404, "Entrada no encontrada");
+    verificarAccesoSede(usuarioActual, entrada.sedeId, "anular entradas de");
     if (entrada.estado === "anulada")
       throw new ErrorApi(400, "La entrada ya está anulada");
 

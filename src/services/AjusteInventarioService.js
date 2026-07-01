@@ -5,12 +5,14 @@ import ErrorApi from "../utils/ErrorApi.js";
 import { generarCodigo } from "../utils/generadorCodigo.util.js";
 import { logAccionUsuario } from "../config/logger.js";
 import { crearTrazabilidad } from "../utils/trazabilidad.util.js";
+import { verificarAccesoSede } from "../utils/accesoSede.util.js";
 
 class AjusteInventarioService {
-  async crearAjuste(datos, usuarioId) {
+  async crearAjuste(datos, usuarioId, usuarioActual = null) {
     if (!datos.items || datos.items.length === 0) {
       throw new ErrorApi(400, "El ajuste debe tener al menos un item");
     }
+    verificarAccesoSede(usuarioActual, datos.sedeId, "crear ajustes en");
 
     const codigo = await generarCodigo(
       "AJU",

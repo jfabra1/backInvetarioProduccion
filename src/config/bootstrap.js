@@ -9,35 +9,58 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Admin1234*";
 const ADMIN_NOMBRE = process.env.ADMIN_NOMBRE || "Administrador";
 
 /**
- * Crea el primer usuario administrador al iniciar el sistema,
- * únicamente cuando no existe ningún usuario en la base de datos.
+ * Crea (o completa) el rol "Administrador" con todos los permisos del
+ * sistema. Se ejecuta en CADA arranque, no solo cuando la base está vacía,
+ * para que un módulo nuevo (ej. "ventas", "racks") no deje al rol
+ * Administrador desactualizado — ya que los permisos de "esAdmin" ahora
+ * dependen íntegramente de su rol, igual que cualquier otro usuario.
  */
-export const inicializarPrimerUsuario = async () => {
-  const totalUsuarios = await Usuario.countDocuments({});
-
-  if (totalUsuarios > 0) {
-    return;
-  }
-
+const sincronizarRolAdministrador = async () => {
   let rolAdministrador = await Rol.findOne({ nombre: "Administrador" });
+  const permisosCompletos = generarTodosLosPermisos();
 
   if (!rolAdministrador) {
     rolAdministrador = await Rol.create({
       nombre: "Administrador",
       descripcion: "Rol con todos los permisos del sistema",
-      permisos: generarTodosLosPermisos(),
+      permisos: permisosCompletos,
       esPredeterminado: true,
       activo: true,
     });
 
     logger.info("Bootstrap: rol Administrador creado");
-  } else {
-    rolAdministrador.permisos = generarTodosLosPermisos();
-    await rolAdministrador.save();
+    return rolAdministrador;
+  }
 
+  const permisosActuales = new Set(
+    rolAdministrador.permisos.map((p) => `${p.modulo}:${p.accion}`),
+  );
+  const faltantes = permisosCompletos.filter(
+    (p) => !permisosActuales.has(`${p.modulo}:${p.accion}`),
+  );
+
+  if (faltantes.length > 0) {
+    rolAdministrador.permisos = permisosCompletos;
+    await rolAdministrador.save();
     logger.info(
-      "Bootstrap: rol Administrador actualizado con todos los permisos",
+      { permisosAgregados: faltantes },
+      "Bootstrap: rol Administrador resincronizado con módulos nuevos",
     );
+  }
+
+  return rolAdministrador;
+};
+
+/**
+ * Crea el primer usuario administrador al iniciar el sistema,
+ * únicamente cuando no existe ningún usuario en la base de datos.
+ */
+export const inicializarPrimerUsuario = async () => {
+  const rolAdministrador = await sincronizarRolAdministrador();
+
+  const totalUsuarios = await Usuario.countDocuments({});
+  if (totalUsuarios > 0) {
+    return;
   }
 
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 12);

@@ -2,31 +2,33 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import UsuarioRepository from "../repositories/UsuarioRepository.js";
 import RolRepository from "../repositories/RolRepository.js";
+import SedeRepository from "../repositories/SedeRepository.js";
 import RefreshTokenRepository from "../repositories/RefreshTokenRepository.js";
 import ErrorApi from "../utils/ErrorApi.js";
 import { logAccionUsuario, logError } from "../config/logger.js";
-import { generarTodosLosPermisos } from "../utils/permisos.util.js";
 
 class AuthService {
   async construirUsuarioSesion(usuario) {
+    // "esAdmin" solo habilita operar entre sedes; los permisos por
+    // módulo/acción siempre vienen del rol asignado (igual que cualquier
+    // otro usuario), sin excepción.
     let permisos = [];
 
-    if (usuario.esAdmin) {
-      permisos = generarTodosLosPermisos();
-    } else if (usuario.rolId) {
+    if (usuario.rolId) {
       const rol = await RolRepository.findById(usuario.rolId);
       if (rol?.activo && Array.isArray(rol.permisos)) {
         permisos = rol.permisos;
       }
     }
 
-    // Normaliza sedeId: siempre devuelve { _id, nombre } o null
-    const sedeRaw = usuario.sedeId;
-    const sedeId = sedeRaw
-      ? typeof sedeRaw === "object" && sedeRaw._id
-        ? { _id: String(sedeRaw._id), nombre: sedeRaw.nombre || "" }
-        : { _id: String(sedeRaw), nombre: "" }
-      : null;
+    // usuario.sedeId llega como ObjectId crudo (findByEmail/findById no
+    // populan) — se resuelve aquí para que el frontend siempre reciba
+    // {_id, nombre} y no el id pelado.
+    let sedeId = usuario.sedeId;
+    if (sedeId && !sedeId.nombre) {
+      const sede = await SedeRepository.findById(sedeId);
+      if (sede) sedeId = { _id: sede._id, nombre: sede.nombre };
+    }
 
     return {
       id: usuario._id,

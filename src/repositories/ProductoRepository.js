@@ -22,47 +22,65 @@ class ProductoRepository extends BaseRepository {
     });
   }
 
-  async findAllPaginado(pagina, limite, filtros = {}) {
-    const consulta = this.construirFiltros(filtros);
+  async findPaginadoConUnidades(
+    filtro = {},
+    pagina = 1,
+    limite = 50,
+    ordenamiento = { createdAt: -1 },
+  ) {
     const saltar = (pagina - 1) * limite;
 
-    const [datos, total] = await Promise.all([
+    const [documentos, total] = await Promise.all([
       this.model
-        .find(consulta)
-        .populate("categoriaId", "nombre")
-        .sort({ createdAt: -1 })
+        .find(filtro)
+        .populate("unidadMedidaId", "codigo nombre")
+        .populate("presentaciones.unidadMedidaId", "codigo nombre")
+        .populate("presentaciones.unidadContenidoId", "codigo nombre")
+        .sort(ordenamiento)
         .skip(saltar)
         .limit(limite),
-      this.model.countDocuments(consulta),
+      this.model.countDocuments(filtro),
     ]);
 
     return {
-      datos,
+      documentos,
       paginacion: {
+        pagina: parseInt(pagina),
+        limite: parseInt(limite),
         total,
-        pagina,
-        limite,
         totalPaginas: Math.ceil(total / limite),
-        tieneAnterior: pagina > 1,
-        tieneSiguiente: pagina < Math.ceil(total / limite),
+        hayPaginaSiguiente: pagina * limite < total,
+        hayPaginaAnterior: pagina > 1,
       },
     };
   }
 
   construirFiltros(filtros) {
+    const escaparRegex = (texto = "") =>
+      String(texto).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     const consulta = {};
     if (filtros.activo !== undefined) {
       consulta.activo = filtros.activo;
     }
     if (filtros.nombre)
-      consulta.nombre = { $regex: filtros.nombre, $options: "i" };
+      consulta.nombre = { $regex: escaparRegex(filtros.nombre), $options: "i" };
     if (filtros.categoriaId) consulta.categoriaId = filtros.categoriaId;
     if (filtros.subcategoriaId)
       consulta.subcategoriaId = filtros.subcategoriaId;
     if (filtros.codigoInterno)
-      consulta.codigoInterno = { $regex: filtros.codigoInterno, $options: "i" };
+      consulta.codigoInterno = { $regex: escaparRegex(filtros.codigoInterno), $options: "i" };
     if (filtros.codigoExterno)
-      consulta.codigoExterno = { $regex: filtros.codigoExterno, $options: "i" };
+      consulta.codigoExterno = { $regex: escaparRegex(filtros.codigoExterno), $options: "i" };
+    if (filtros.busqueda) {
+      const regex = { $regex: escaparRegex(filtros.busqueda), $options: "i" };
+      consulta.$or = [
+        { nombre: regex },
+        { codigoInterno: regex },
+        { codigoExterno: regex },
+        { referencia: regex },
+      ];
+    }
     return consulta;
   }
 }
