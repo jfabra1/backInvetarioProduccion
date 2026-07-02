@@ -16,6 +16,7 @@ const itemAjusteSchema = new mongoose.Schema(
   { _id: true },
 );
 
+
 const ajusteInventarioSchema = new mongoose.Schema(
   {
     codigo: { type: String, unique: true, trim: true, uppercase: true },

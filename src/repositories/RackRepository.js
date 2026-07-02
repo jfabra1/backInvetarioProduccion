@@ -10,6 +10,32 @@ class RackRepository extends BaseRepository {
     return this.model.findOne({ nombre, sedeId, activo: true });
   }
 
+  async findPaginado(filtro = {}, pagina = 1, limite = 50, ordenamiento = { createdAt: -1 }) {
+    const saltar = (pagina - 1) * limite;
+
+    const [documentos, total] = await Promise.all([
+      this.model
+        .find(filtro)
+        .populate("sedeId", "nombre codigo")
+        .sort(ordenamiento)
+        .skip(saltar)
+        .limit(limite),
+      this.model.countDocuments(filtro),
+    ]);
+
+    return {
+      documentos,
+      paginacion: {
+        pagina: parseInt(pagina),
+        limite: parseInt(limite),
+        total,
+        totalPaginas: Math.ceil(total / limite),
+        hayPaginaSiguiente: pagina * limite < total,
+        hayPaginaAnterior: pagina > 1,
+      },
+    };
+  }
+
   async findAll(filtro = {}) {
     return this.model
       .find(filtro)
