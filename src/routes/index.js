@@ -8,6 +8,7 @@ import unidadMedidaRoutes from "./unidadMedida.routes.js";
 import productoRoutes from "./producto.routes.js";
 import terceroRoutes from "./tercero.routes.js";
 import ordenCompraRoutes from "./ordenCompra.routes.js";
+import ordenPedidoRoutes from "./ordenPedido.routes.js";
 import entradaRoutes from "./entrada.routes.js";
 import salidaRoutes from "./salida.routes.js";
 import ventaRoutes from "./venta.routes.js";
@@ -32,6 +33,7 @@ const rutasPrincipales = async (fastify, opciones) => {
   await fastify.register(productoRoutes, { prefix: "/v1/productos" });
   await fastify.register(terceroRoutes, { prefix: "/v1/terceros" });
   await fastify.register(ordenCompraRoutes, { prefix: "/v1/ordenes-compra" });
+  await fastify.register(ordenPedidoRoutes, { prefix: "/v1/ordenes-pedido" });
   await fastify.register(entradaRoutes, { prefix: "/v1/entradas" });
   await fastify.register(salidaRoutes, { prefix: "/v1/salidas" });
   await fastify.register(ventaRoutes, { prefix: "/v1/ventas" });

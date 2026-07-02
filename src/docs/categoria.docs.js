@@ -80,7 +80,7 @@ const schemaListarCategoriasPaginado = {
     type: "object",
     properties: {
       pagina: { type: "integer", minimum: 1, default: 1 },
-      limite: { type: "integer", minimum: 1, maximum: 100, default: 50 },
+      limite: { type: "integer", minimum: 1, maximum: 1000, default: 50 },
       nombre: { type: "string" },
       descripcion: { type: "string" },
       subcategoriaNombre: { type: "string" },

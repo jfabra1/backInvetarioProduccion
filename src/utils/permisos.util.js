@@ -21,6 +21,7 @@ export const MODULOS = Object.freeze({
   PRODUCTOS: "productos",
   TERCEROS: "terceros",
   ORDENES_COMPRA: "ordenes_compra",
+  ORDENES_PEDIDO: "ordenes_pedido",
   ENTRADAS: "entradas",
   SALIDAS: "salidas",
   TRASLADOS: "traslados",
@@ -73,6 +74,12 @@ export const ACCIONES_POR_MODULO = Object.freeze({
     ACCIONES.ELIMINAR,
   ],
   [MODULOS.ORDENES_COMPRA]: [
+    ACCIONES.VER,
+    ACCIONES.CREAR,
+    ACCIONES.ACTUALIZAR,
+    ACCIONES.ELIMINAR,
+  ],
+  [MODULOS.ORDENES_PEDIDO]: [
     ACCIONES.VER,
     ACCIONES.CREAR,
     ACCIONES.ACTUALIZAR,
