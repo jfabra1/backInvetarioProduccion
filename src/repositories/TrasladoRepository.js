@@ -6,11 +6,10 @@ class TrasladoRepository extends BaseRepository {
     super(Traslado);
   }
 
-  async findAllPaginado(pagina, limite, filtros = {}) {
-    const consulta = this.construirFiltros(filtros);
+  async findPaginado(consulta = {}, pagina = 1, limite = 20) {
     const saltar = (pagina - 1) * limite;
 
-    const [datos, total] = await Promise.all([
+    const [documentos, total] = await Promise.all([
       this.model
         .find(consulta)
         .populate("sedeOrigenId", "nombre codigo")
@@ -26,14 +25,14 @@ class TrasladoRepository extends BaseRepository {
 
     
     return {
-      datos,
+      documentos,
       paginacion: {
         total,
         pagina,
         limite,
         totalPaginas: Math.ceil(total / limite),
-        tieneAnterior: pagina > 1,
-        tieneSiguiente: pagina < Math.ceil(total / limite),
+        hayPaginaAnterior: pagina > 1,
+        hayPaginaSiguiente: pagina < Math.ceil(total / limite),
       },
     };
   }

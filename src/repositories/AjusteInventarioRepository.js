@@ -6,13 +6,13 @@ class AjusteInventarioRepository extends BaseRepository {
     super(AjusteInventario);
   }
 
-  async findAllPaginado(pagina, limite, filtros = {}) {
+  async findPaginado(filtros = {}, pagina = 1, limite = 20) {
     const consulta = {};
     if (filtros.sedeId) consulta.sedeId = filtros.sedeId;
     if (filtros.estado) consulta.estado = filtros.estado;
 
     const saltar = (pagina - 1) * limite;
-    const [datos, total] = await Promise.all([
+    const [documentos, total] = await Promise.all([
       this.model
         .find(consulta)
         .populate("sedeId", "nombre codigo")
@@ -26,14 +26,14 @@ class AjusteInventarioRepository extends BaseRepository {
     ]);
 
     return {
-      datos,
+      documentos,
       paginacion: {
         total,
         pagina,
         limite,
         totalPaginas: Math.ceil(total / limite),
-        tieneAnterior: pagina > 1,
-        tieneSiguiente: pagina < Math.ceil(total / limite),
+        hayPaginaAnterior: pagina > 1,
+        hayPaginaSiguiente: pagina < Math.ceil(total / limite),
       },
     };
   }

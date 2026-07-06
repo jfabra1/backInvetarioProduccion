@@ -22,6 +22,7 @@ class OrdenPedidoRepository extends BaseRepository {
         .find(filtro)
         .populate("sedeSolicitanteId", "nombre codigo")
         .populate("sedeProveedoraId", "nombre codigo")
+        .populate("items.productoId", "nombre codigoInterno")
         .sort(ordenamiento)
         .skip(saltar)
         .limit(limite),
