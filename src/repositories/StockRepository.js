@@ -71,7 +71,7 @@ class StockRepository extends BaseRepository {
         "nombre codigoInterno codigoExterno categoriaId stockMinimo stockMaximo",
       )
       .populate("sedeId", "nombre codigo")
-      .sort({ "productoId.nombre": 1 });
+      .lean();
   }
 
   async obtenerStockGlobal(filtros = {}) {

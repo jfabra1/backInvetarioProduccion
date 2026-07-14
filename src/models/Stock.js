@@ -39,6 +39,10 @@ const stockSchema = new mongoose.Schema(
 );
 
 stockSchema.index({ productoId: 1, sedeId: 1 }, { unique: true });
+// El índice compuesto de arriba no sirve para consultas que filtran solo por
+// sedeId (no es prefijo izquierdo): sin este índice, obtenerStockPorSede()
+// hace un escaneo de colección que se pone lento a medida que crece el stock.
+stockSchema.index({ sedeId: 1 });
 
 const Stock = mongoose.model("Stock", stockSchema);
 export default Stock;
