@@ -8,7 +8,10 @@ const schemaStockPorSede = {
   },
   querystring: {
     type: "object",
-    properties: { productoId: { type: "string" } },
+    properties: {
+      productoId: { type: "string" },
+      productoIds: { type: "string", description: "IDs de producto separados por coma" },
+    },
   },
 };
 
@@ -17,7 +20,10 @@ const schemaStockGlobal = {
   tags: ["Inventario"],
   querystring: {
     type: "object",
-    properties: { productoId: { type: "string" } },
+    properties: {
+      productoId: { type: "string" },
+      productoIds: { type: "string", description: "IDs de producto separados por coma" },
+    },
   },
 };
 

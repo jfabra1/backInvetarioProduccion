@@ -23,9 +23,10 @@ class InventarioController {
     // No-admin con sede: solo puede consultar su propia sede, ignora el param de URL
     const sedeId = esAdmin ? request.params.sedeId : sedeIdUsuario;
 
-    const { productoId } = request.query;
+    const { productoId, productoIds } = request.query;
     const filtros = {};
     if (productoId) filtros.productoId = productoId;
+    if (productoIds) filtros.productoIds = productoIds.split(",").filter(Boolean);
 
     const stock = await InventarioService.obtenerStockPorSede(sedeId, filtros);
     return RespuestaApi.exito(reply, "Stock por sede obtenido", { stock });
@@ -35,9 +36,10 @@ class InventarioController {
     const esAdmin = Boolean(request.usuario?.esAdmin);
     const sedeIdUsuario = resolverSedeUsuario(request);
 
-    const { productoId } = request.query;
+    const { productoId, productoIds } = request.query;
     const filtros = {};
     if (productoId) filtros.productoId = productoId;
+    if (productoIds) filtros.productoIds = productoIds.split(",").filter(Boolean);
 
     // No-admin: devuelve solo su sede en lugar del stock global
     if (!esAdmin) {

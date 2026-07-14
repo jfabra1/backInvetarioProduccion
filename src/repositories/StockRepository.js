@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import BaseRepository from "./BaseRepository.js";
 import Stock from "../models/Stock.js";
 
@@ -61,6 +62,7 @@ class StockRepository extends BaseRepository {
   async obtenerStockPorSede(sedeId, filtros = {}) {
     const consulta = { sedeId };
     if (filtros.productoId) consulta.productoId = filtros.productoId;
+    if (filtros.productoIds?.length) consulta.productoId = { $in: filtros.productoIds };
 
     return this.model
       .find(consulta)
@@ -74,7 +76,12 @@ class StockRepository extends BaseRepository {
 
   async obtenerStockGlobal(filtros = {}) {
     const match = {};
-    if (filtros.productoId) match.productoId = filtros.productoId;
+    if (filtros.productoId) match.productoId = new mongoose.Types.ObjectId(filtros.productoId);
+    if (filtros.productoIds?.length) {
+      match.productoId = {
+        $in: filtros.productoIds.map((id) => new mongoose.Types.ObjectId(id)),
+      };
+    }
 
     return this.model.aggregate([
       { $match: match },
