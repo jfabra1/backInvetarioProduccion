@@ -109,6 +109,91 @@ class SalidaService {
     return salida;
   }
 
+  async actualizarSalida(id, datos, usuarioId, usuarioActual = null) {
+    const salida = await SalidaRepository.findById(id);
+    if (!salida) throw new ErrorApi(404, "Salida no encontrada");
+    verificarAccesoSede(usuarioActual, salida.sedeId, "editar salidas de");
+    if (salida.estado === "anulada") {
+      throw new ErrorApi(400, "No se puede editar una salida anulada");
+    }
+    if (!datos.items || datos.items.length === 0) {
+      throw new ErrorApi(400, "La salida debe tener al menos un item");
+    }
+
+    const sesion = await mongoose.startSession();
+    sesion.startTransaction();
+
+    try {
+      // Se revierte el stock de los items originales antes de aplicar los
+      // nuevos: así la diferencia (aumento o disminución) queda reflejada
+      // correctamente sin importar si un producto se repite entre ambas listas.
+      for (const item of salida.items) {
+        await StockRepository.incrementarStock(
+          item.productoId,
+          salida.sedeId,
+          item.cantidad,
+          { session: sesion },
+        );
+      }
+
+      for (const item of datos.items) {
+        const stock = await StockRepository.findByProductoYSede(
+          item.productoId,
+          salida.sedeId,
+          { session: sesion },
+        );
+        if (!stock || stock.cantidadDisponible < item.cantidad) {
+          throw new ErrorApi(
+            400,
+            `Stock insuficiente para producto ${item.productoId}`,
+          );
+        }
+      }
+
+      for (const item of datos.items) {
+        const resultado = await StockRepository.decrementarStock(
+          item.productoId,
+          salida.sedeId,
+          item.cantidad,
+          { session: sesion },
+        );
+        if (!resultado) {
+          throw new ErrorApi(
+            400,
+            `Error al decrementar stock del producto ${item.productoId}`,
+          );
+        }
+      }
+
+      const actualizada = await SalidaRepository.updateById(
+        id,
+        {
+          $set: {
+            items: datos.items,
+            observaciones: datos.observaciones || "",
+          },
+          $push: {
+            trazabilidad: crearTrazabilidad(
+              usuarioId,
+              "actualizacion",
+              `Salida ${salida.codigo} editada`,
+            ),
+          },
+        },
+        { session: sesion },
+      );
+
+      await sesion.commitTransaction();
+      logAccionUsuario(usuarioId, "ACTUALIZAR_SALIDA", { salidaActualizada: id });
+      return actualizada;
+    } catch (error) {
+      await sesion.abortTransaction();
+      throw error;
+    } finally {
+      sesion.endSession();
+    }
+  }
+
   async anularSalida(id, usuarioId, usuarioActual = null) {
     const salida = await SalidaRepository.findById(id);
     if (!salida) throw new ErrorApi(404, "Salida no encontrada");

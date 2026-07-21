@@ -5,6 +5,7 @@ import {
   schemaCrearVenta,
   schemaListarVentasPaginado,
   schemaObtenerVenta,
+  schemaActualizarVenta,
   schemaAnularVenta,
 } from "../docs/venta.docs.js";
 
@@ -36,6 +37,15 @@ async function ventaRoutes(fastify) {
       preHandler: verificarPermiso("ventas", "ver"),
     },
     (req, reply) => VentaController.obtenerPorId(req, reply),
+  );
+
+  fastify.put(
+    "/:id",
+    {
+      schema: schemaActualizarVenta,
+      preHandler: verificarPermiso("ventas", "actualizar"),
+    },
+    (req, reply) => VentaController.actualizar(req, reply),
   );
 
   fastify.patch(

@@ -67,6 +67,33 @@ const schemaObtenerVenta = {
   },
 };
 
+const schemaActualizarVenta = {
+  summary: "Editar venta",
+  description:
+    "Edita los items y observaciones de una venta aplicada, ajustando el stock según la diferencia con los items originales",
+  tags: ["Ventas"],
+  security: [{ bearerAuth: [] }],
+  params: {
+    type: "object",
+    properties: { id: { type: "string" } },
+    required: ["id"],
+  },
+  body: {
+    type: "object",
+    required: ["items"],
+    properties: {
+      items: { type: "array", items: itemVentaSchema, minItems: 1 },
+      observaciones: { type: "string", maxLength: 500 },
+    },
+    additionalProperties: false,
+  },
+  response: {
+    200: { description: "Venta actualizada" },
+    400: { description: "Datos inválidos o stock insuficiente" },
+    404: { description: "Venta no encontrada" },
+  },
+};
+
 const schemaAnularVenta = {
   summary: "Anular venta",
   description: "Anular venta y devolver stock al inventario",
@@ -91,6 +118,7 @@ export {
   schemaCrearVenta,
   schemaListarVentasPaginado,
   schemaObtenerVenta,
+  schemaActualizarVenta,
   schemaAnularVenta,
   ventaTags,
 };

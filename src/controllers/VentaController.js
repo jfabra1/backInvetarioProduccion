@@ -39,6 +39,16 @@ class VentaController {
     return RespuestaApi.exito(reply, "Venta obtenida", { venta });
   }
 
+  async actualizar(request, reply) {
+    const venta = await VentaService.actualizarVenta(
+      request.params.id,
+      request.body,
+      request.usuarioId,
+      request.usuario,
+    );
+    return RespuestaApi.exito(reply, "Venta actualizada", { venta });
+  }
+
   async anular(request, reply) {
     const venta = await VentaService.anularVenta(
       request.params.id,

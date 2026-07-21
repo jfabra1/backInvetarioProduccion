@@ -60,6 +60,20 @@ class VentaService {
     return formatearVenta(venta);
   }
 
+  async actualizarVenta(id, datos, usuarioId, usuarioActual = null) {
+    const salida = await SalidaRepository.findById(id);
+    if (!salida || salida.tipo !== "venta") {
+      throw new ErrorApi(404, "Venta no encontrada");
+    }
+    const actualizada = await SalidaService.actualizarSalida(
+      id,
+      datos,
+      usuarioId,
+      usuarioActual,
+    );
+    return formatearVenta(actualizada);
+  }
+
   async anularVenta(id, usuarioId, usuarioActual = null) {
     const salida = await SalidaRepository.findById(id);
     if (!salida || salida.tipo !== "venta") {
