@@ -1,5 +1,6 @@
 export const configuracionLimitadorAuth = {
-  max: 15,
+  // Configurable para pruebas locales; por defecto 15 intentos por IP.
+  max: Number(process.env.AUTH_RATE_LIMIT_MAX) || 15,
   timeWindow: "15 minutes",
   errorResponseBuilder: () => ({
     statusCode: 429,

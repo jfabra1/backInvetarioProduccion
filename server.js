@@ -149,7 +149,7 @@ const iniciar = async () => {
 
     // 3. Rate Limiting global
     await aplicacion.register(import("@fastify/rate-limit"), {
-      max: 300,
+      max: Number(process.env.RATE_LIMIT_MAX) || 300,
       timeWindow: "15 minutes",
       errorResponseBuilder: (_request, _context) => ({
         statusCode: 429,

@@ -1,6 +1,12 @@
 import AuthController from "../controllers/AuthController.js";
 import { autenticar } from "../hooks/auth.hook.js";
 import { configuracionLimitadorAuth } from "../hooks/rateLimiter.hook.js";
+
+// perfil y renovar-token se llaman en cada carga de página / renovación
+// automática. Tenían límites propios (120 y 60 cada 15 min por IP) MÁS BAJOS
+// que el global, y al agotarse el front cerraba la sesión del usuario.
+// Usan el mismo límite que el global.
+const limiteSesion = { max: Number(process.env.RATE_LIMIT_MAX) || 300, timeWindow: "15 minutes" };
 import {
   schemaLogin,
   schemaRenovarToken,
@@ -26,7 +32,7 @@ const rutasAuth = async (fastify, opciones) => {
   fastify.post(
     "/renovar-token",
     {
-      config: { rateLimit: { max: 60, timeWindow: "15 minutes" } },
+      config: { rateLimit: limiteSesion },
       schema: schemaRenovarToken,
     },
     AuthController.renovarToken,
@@ -75,7 +81,7 @@ const rutasAuth = async (fastify, opciones) => {
   fastify.get(
     "/perfil",
     {
-      config: { rateLimit: { max: 120, timeWindow: "15 minutes" } },
+      config: { rateLimit: limiteSesion },
       preHandler: [autenticar],
       schema: schemaPerfil,
     },

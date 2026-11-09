@@ -46,9 +46,14 @@ class CategoriaService {
     }
     if (filtros.busqueda) {
       const regexBusqueda = escaparRegex(filtros.busqueda);
+      // En la pantalla de categorías cada fila es una subcategoría (el padre
+      // solo guarda el código, ej. "0012"): la búsqueda también debe mirar
+      // sus nombres, o nunca encontraba lo que el usuario ve en la tabla.
       filtroConsulta.$or = [
         { nombre: { $regex: regexBusqueda, $options: "i" } },
         { descripcion: { $regex: regexBusqueda, $options: "i" } },
+        { "subcategorias.nombre": { $regex: regexBusqueda, $options: "i" } },
+        { "subcategorias.descripcion": { $regex: regexBusqueda, $options: "i" } },
       ];
     }
     if (filtros.subcategoriaNombre) {
