@@ -133,6 +133,14 @@ class ProductoService {
       consulta._id = { $in: idsConStock };
     }
 
+    if (filtroConsulta.busqueda?.trim()) {
+      return await ProductoRepository.findPaginadoPorRelevancia(
+        consulta,
+        filtroConsulta.busqueda,
+        pagina,
+        limite,
+      );
+    }
     return await ProductoRepository.findPaginadoConUnidades(consulta, pagina, limite);
   }
 
